@@ -46,70 +46,96 @@ speed = 10
 vel_x = speed
 vel_y = 0
 
-while not gameExit:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameExit = True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_DOWN:
-                prev_vel = vel_y
-                vel_y = speed
-                vel_x = 0
-                if(prev_vel == -speed):
-                    fakesnake = snake[::-1]
-                    snake = fakesnake
+def start():
+    global gameExit, snake, speed, gamedisplay, food, vel_x, vel_y
+    while not gameExit:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameExit = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_DOWN:
+                    #print("Down")
+                    prev_vel = vel_y
+                    vel_y = speed
+                    vel_x = 0
+                    if(prev_vel == -speed):
+                        tail_vel_y = snake[-2][1] - snake[-1][1]
+                        fakesnake = snake[::-1]
+                        snake = fakesnake
+                        if tail_vel_y == -prev_vel:
+                            vel_y = -speed
                     
-            elif event.key == pygame.K_UP:
-                prev_vel = vel_y
-                vel_y = -speed
-                vel_x = 0
-                if(prev_vel == speed):
-                    fakesnake = snake[::-1]
-                    snake = fakesnake
+                elif event.key == pygame.K_UP:
+                    #print("Up")
+                    prev_vel = vel_y
+                    vel_y = -speed
+                    vel_x = 0
+                    if(prev_vel == speed):
+                        tail_vel_y = snake[-2][1] - snake[-1][1]
+                        fakesnake = snake[::-1]
+                        snake = fakesnake
+                        if tail_vel_y == -prev_vel:
+                            vel_y = speed
 
-            elif event.key == pygame.K_LEFT:
-                prev_vel = vel_x
-                vel_x = -speed
-                vel_y = 0
-                if(prev_vel == speed):
-                    fakesnake = snake[::-1]
-                    snake = fakesnake
+                elif event.key == pygame.K_LEFT:
+                    #print("Left")
+                    prev_vel = vel_x
+                    vel_x = -speed
+                    vel_y = 0
+                    if(prev_vel == speed):
+                        tail_vel_x = snake[-2][0] - snake[-1][0]
+                        fakesnake = snake[::-1]
+                        snake = fakesnake
+                        if tail_vel_x == -prev_vel:
+                            vel_x = speed
 
-            elif event.key == pygame.K_RIGHT:
-                prev_vel = vel_x
-                vel_x = speed
-                vel_y = 0
-                if(prev_vel == -speed):
-                    fakesnake = snake[::-1]
-                    snake = fakesnake
+                elif event.key == pygame.K_RIGHT:
+                    #print("Right")
+                    prev_vel = vel_x
+                    vel_x = speed
+                    vel_y = 0
+                    if(prev_vel == -speed):
+                        tail_vel_x = snake[-2][0] - snake[-1][0]
+                        fakesnake = snake[::-1]
+                        snake = fakesnake
+                        if tail_vel_x == -prev_vel:
+                            vel_x = -speed
 
-    gamedisplay.fill(white)
-    for x in snake:
-        pygame.draw.rect(gamedisplay, black, x, 3)
+        gamedisplay.fill(white)
+        for x in snake:
+            pygame.draw.rect(gamedisplay, black, x, 3)
 
-    pygame.draw.rect(gamedisplay, black, food)
+        pygame.draw.rect(gamedisplay, black, food)
 
-    upfront = [0, 0, 0, 0]
+        upfront = [0, 0, 0, 0]
 
-    snake.pop(-1)
-    snake.insert(0, [0, 0, 10, 10])
-    snake[0][0] = snake[1][0] + vel_x
-    snake[0][1] = snake[1][1] + vel_y
+        snake.pop(-1)
+        snake.insert(0, [0, 0, 10, 10])
+        snake[0][0] = snake[1][0] + vel_x
+        snake[0][1] = snake[1][1] + vel_y
 
-    if snake[0] in snake[1::]:
-        gameExit = True
+        tail_vel_y = snake[-2][1] - snake[-1][1]
+        tail_vel_x = snake[-2][0] - snake[-2][0]
 
-    if snake[-1] == food:
-        snake.append([food[0]-(snake[-2][0]-snake[-1][0]),
-                      food[1]-(snake[-2][1]-snake[-1][1]),
-                      10, 10])
-        food = [random.randint(10, WIDTH/10)*10,
-                random.randint(10, HEIGHT/10)*10, 10, 10]
+        if snake[0] == food:
+            snake.append([snake[-1][0] - tail_vel_x,
+                          snake[-1][1] - tail_vel_y,
+                          10, 10])
+            food = [random.randint(10, WIDTH/10)*10,
+                    random.randint(10, HEIGHT/10)*10, 10, 10]
+            while not check_area(food):
+                food = [random.randint(10, WIDTH/10)*10,
+                        random.randint(10, HEIGHT/10)*10, 10, 10]
 
-    pygame.display.update()
-    if not gameExit:
-        gameExit = not check_area(snake[0])
-    pyClock.tick(FPS)
+        if snake[0] in snake[1::]:
+            gameExit = True
 
-pygame.quit()
-quit()
+        pygame.display.update()
+        if not gameExit:
+            gameExit = not check_area(snake[0])
+        pyClock.tick(FPS)
+
+    pygame.quit()
+    quit()
+
+start()
